@@ -1,0 +1,6 @@
+# Fill in these values and remove .txt extension.
+# Do not push properties files to your repository! 
+username=user###
+database=user###
+password=????
+hostname=localhost:3307

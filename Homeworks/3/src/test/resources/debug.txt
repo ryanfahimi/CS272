@@ -1,0 +1,10 @@
+[001 TRACE] main at LoggerSetup.java:23 - Turkey 
+[002 DEBUG] main at LoggerSetup.java:24 - Duck 
+[003 INFO ] main at LoggerSetup.java:25 - Ibis 
+[004 WARN ] main at LoggerSetup.java:26 - Wren 
+[005 ERROR] main at LoggerSetup.java:29 - Eastern java.lang.Exception: Eagle
+	at edu.usfca.cs272.LoggerSetup.outputMessages(LoggerSetup.java:29)
+	at edu.usfca.cs272.LoggerSetup.main(LoggerSetup.java:40)
+[006 FATAL] main at LoggerSetup.java:30 - Catching java.lang.RuntimeException: Falcon
+	at edu.usfca.cs272.LoggerSetup.outputMessages(LoggerSetup.java:30)
+	at edu.usfca.cs272.LoggerSetup.main(LoggerSetup.java:40)

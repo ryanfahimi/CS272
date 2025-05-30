@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${title}</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: {} }
+    };
+  </script>
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme');
+      const prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (theme === 'dark' || (!theme && prefers)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen pt-8 flex flex-col transition-colors duration-200">
+
+  <div class="fixed top-4 right-4 flex gap-1.5">
+    <button
+      id="themeToggle"
+	  title="Toggle Theme"
+      aria-label="Toggle dark or light mode"
+      class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728
+             0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0
+             0012 21a9.003 9.003 0 008.354-5.646z" />
+      </svg>
+    </button>
+
+    <a href="/download" title="Download Index JSON"
+      class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-blue-600 dark:text-blue-400" aria-label="Download index JSON">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0
+             0l-4-4m4 4V4" />
+      </svg>
+    </a>
+	
+	<button
+	  id="adminButton"
+	  title="Admin Shutdown"
+	  aria-label="Admin Shutdown"
+	  aria-controls="adminModal"
+	  aria-expanded="false"
+	  class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-red-600 dark:text-red-400"
+	>
+	<svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+	  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+	    d="M12 3v10M18.36 6.64a9 9 0 11-12.73 0" />
+	</svg>
+	</button>
+  </div>
+  
+  <div
+    id="adminModal"
+    class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-start justify-center z-50 pt-40"
+	aria-modal="true"
+	aria-hidden="true"
+  >
+    <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
+		<div class="flex justify-end">
+		  <button
+		    id="closeAdminModalButton"
+		    type="button"
+		    class="p-1 pb-0 hover:opacity-70 text-gray-500 dark:text-gray-400"
+			title="Close"
+			aria-label="Close admin modal"
+		  >
+		    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+		         viewBox="0 0 24 24" stroke="currentColor">
+		      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+		    </svg>
+		  </button>
+		</div>
+		
+		<div id="adminMessage" class="hidden mb-4 mt-3 p-3 rounded text-sm text-center font-medium"></div>
+            
+      <form id="adminForm" action="/shutdown" method="post" class="space-y-4">
+        <div>
+          <label for="adminPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Admin Password
+          </label>
+          <input
+            type="password"
+            id="adminPassword"
+            name="token"
+            class="block w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            required
+          />
+        </div>
+        
+        <div class="pt-1">
+          <button
+            type="submit"
+            id="shutdownButton"
+            class="w-full py-2 px-4 rounded bg-red-600 hover:bg-red-700 text-white font-medium"
+          >
+            Shutdown Server
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="container mx-auto px-4 max-w-3xl flex-grow mb-24">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8 text-center">${title}</h1>
+
+    <form id="searchForm" method="get" action="/" class="flex flex-col mb-8">
+      <div id="searchContainer"
+        class="flex gap-x-2 border border-gray-200 dark:border-gray-700 rounded overflow-hidden shadow bg-white dark:bg-gray-800 transition-colors duration-200"
+      >
+        <input
+          id="searchInput"
+          name="query"
+          value="${query}"
+          placeholder="Search"
+          class="flex-1 px-4 py-2 text-base text-gray-900 dark:text-gray-100 bg-transparent focus:outline-none transition-colors duration-200"
+          type="text"
+        />
+        <button
+          id="clearButton"
+          type="button"
+          title="Clear"
+          class="p-2 border-r border-gray-200 dark:border-gray-700 transition-opacity duration-200 hover:opacity-70 hidden text-gray-700 dark:text-gray-300"
+		  aria-label="Clear search"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <button
+          id="settingsButton"
+          type="button"
+          title="Advanced Settings"
+          class="p-1 transition-opacity duration-200 hover:opacity-70 text-gray-700 dark:text-gray-300"
+		  aria-label="Open advanced settings"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+			      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </button>
+
+        <button type="submit" title="Search" class="pr-4 transition-opacity duration-200 hover:opacity-70" aria-label="Search">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+      </div>
+
+	  <div id="advancedSettings" 
+	  	class="hidden p-6 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-b-lg rounded-t-none shadow transition-colors duration-200 animate-fade-in">
+	    <div class="flex flex-wrap gap-x-12 gap-y-4">
+	      <div class="flex flex-col gap-4 pr-6">
+	        <div class="flex items-center gap-2">
+	          <input
+	            type="checkbox"
+	            id="exactSearch"
+	            name="exactSearch"
+	            value="true"
+	            class="accent-blue-500 cursor-pointer"
+	          />
+	          <label for="exactSearch" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+	            Exact Search
+	          </label>
+	        </div>
+	        <div class="flex items-center gap-2">
+	          <input
+	            type="checkbox"
+	            id="reverseSearch"
+	            name="reverseSearch"
+	            value="true"
+	            class="accent-blue-500 cursor-pointer"
+	          />
+	          <label for="reverseSearch" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+	            Reverse Results
+	          </label>
+	        </div>
+	      </div>
+	      <div class="flex-1 min-w-fit pl-4">
+	        <label for="sourceType" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+	          Source Filter
+	        </label>
+	        <select
+	          id="sourceType"
+	          name="sourceType"
+	          class="block w-full px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-700 text-sm transition-colors duration-200 cursor-pointer"
+	        >
+	          <option value="all">All Sources</option>
+	          <option value="web">Web Sites</option>
+	          <option value="local">Local Files</option>
+	        </select>
+	      </div>
+	    </div>
+	  </div>
+    </form>
+
+    <div
+      id="results"
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-sm transition-colors duration-200"
+    >
+      ${results}
+    </div>
+    <div id="pagination">${pagination}</div>
+  </div>
+
+  <footer
+    class="border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400 mt-auto bg-white dark:bg-gray-800"
+  >
+    <div class="container mx-auto px-4 max-w-3xl py-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 pt-4">
+        <div class="p-3">
+          <span class="block font-medium mb-1">Server Uptime</span>
+          ${uptime}
+        </div>
+        <div class="p-3">
+          <span class="block font-medium mb-1">Words Indexed</span>
+          ${totalWords}
+        </div>
+        <div class="p-3">
+          <span class="block font-medium mb-1">Sources Indexed</span>
+          ${totalSources}
+        </div>
+        <div class="p-3">
+          <span class="block font-medium mb-1">Queries Processed</span>
+          ${totalQueries}
+        </div>
+      </div>
+      <p class="py-2 pb-4">&copy; ${title} - CS 272 Software Development (University of San Francisco)</p>
+    </div>
+  </footer>
+
+  <script src="/static/js/search.js" defer></script>
+  <script src="/static/js/darkMode.js" defer></script>
+  <script src="/static/js/admin.js" defer></script>
+</body>
+</html>

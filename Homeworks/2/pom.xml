@@ -1,0 +1,94 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>Homework2</artifactId>
+	<groupId>edu.usfca.cs272</groupId>
+	<version>2025-01</version>
+
+	<properties>
+		<!-- properties changed via command line -->
+		<config.werror>false</config.werror>
+		<config.xlint>-Xlint:all,-path,-processing,-options,-classfile</config.xlint>
+		<config.xdoclint>-Xdoclint:all/private</config.xdoclint>
+
+		<!-- project settings -->
+		<maven.compiler.release>21</maven.compiler.release>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- plugin versions (must be exact) -->
+		<versions.maven.compiler>3.13.0</versions.maven.compiler>
+		<versions.maven.surefire>3.5.2</versions.maven.surefire>
+
+		<!-- dependency versions -->
+		<versions.junit.jupiter>5.11.4</versions.junit.jupiter>
+		<versions.junit.launcher>1.11.4</versions.junit.launcher>
+		<versions.slf4j.nop>2.0.16</versions.slf4j.nop>
+		<versions.eclipse.jgit>7.0.0.202409031743-r</versions.eclipse.jgit>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${versions.maven.compiler}</version>
+
+				<configuration>
+					<compilerArgs>
+						<arg>-proc:full</arg>
+						<arg>${config.xlint}</arg>
+						<arg>${config.xdoclint}</arg>
+						<arg>-Xdoclint/package:-edu.usfca.cs272.tests.*</arg>
+					</compilerArgs>
+
+					<failOnWarning>${config.werror}</failOnWarning>
+					<showWarnings>true</showWarnings>
+					<showDeprecation>true</showDeprecation>
+					<fork>true</fork>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${versions.maven.surefire}</version>
+
+				<configuration>
+					<trimStackTrace>true</trimStackTrace>
+					<useFile>false</useFile>
+					<excludes>
+						<exclude />
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<!-- for unit testing -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${versions.junit.jupiter}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-launcher</artifactId>
+			<version>${versions.junit.launcher}</version>
+		</dependency>
+
+		<!-- disable slf4j logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-nop</artifactId>
+			<version>${versions.slf4j.nop}</version>
+		</dependency>
+
+		<!-- for git in java -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>${versions.eclipse.jgit}</version>
+		</dependency>
+	</dependencies>
+</project>
