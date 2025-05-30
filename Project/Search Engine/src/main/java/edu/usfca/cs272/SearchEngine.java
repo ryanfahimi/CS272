@@ -26,7 +26,7 @@ public class SearchEngine {
 	private static Path textFiles = null;
 
 	/** Path to the resources directory containing templates and static files. */
-	public static final Path RESOURCES = Path.of("..", "project-ryanfahimi", "src", "main", "resources")
+	public static final Path RESOURCES = Path.of("..", "Search Engine", "src", "main", "resources")
 			.toAbsolutePath()
 			.normalize();
 
