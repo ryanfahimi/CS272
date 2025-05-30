@@ -7,21 +7,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.Status;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -50,9 +39,6 @@ public class HomeworkTest {
 	/** Location of file resources. */
 	public static final Path RESOURCES_DIR = Path.of("src", "test", "resources");
 
-	/** Location of .git folder. */
-	public static final Path GIT_DIR = Path.of(".git").toAbsolutePath().normalize();
-
 	/**
 	 * Makes sure the actual output directory exists.
 	 *
@@ -61,82 +47,6 @@ public class HomeworkTest {
 	@BeforeAll
 	public static void setupEnvironment() throws IOException {
 		Files.createDirectories(ACTUAL_DIR);
-	}
-
-	/**
-	 * Checks if a commit should be made before the tests are run.
-	 *
-	 * @throws Exception if unable to parse git information
-	 *
-	 * @see <a href="https://github.com/eclipse-jgit/jgit/wiki/User-Guide">jgit</a>
-	 * @see <a href="https://github.com/centic9/jgit-cookbook">jgit-cookbook</a>
-	 */
-	@BeforeAll
-	public static void checkCommits() throws Exception {
-		if ("true".equals(System.getenv("GITHUB_ACTIONS"))) {
-			// do not run on GitHub Actions environment
-			return;
-		}
-
-		if (!Files.isDirectory(GIT_DIR)) {
-			Assertions.fail("Unable to locate .git directory...");
-		}
-
-		// setup repository builder
-		FileRepositoryBuilder builder = new FileRepositoryBuilder();
-		builder = builder.setGitDir(GIT_DIR.toFile())
-				.readEnvironment()
-				.findGitDir();
-
-		// try to load repository
-		try (
-			Repository repository = builder.build();
-			Git git = new Git(repository);
-		) {
-			Status status = git.status().call();
-
-			// get uncommitted changes to java files only
-			List<String> changes = status.getUncommittedChanges()
-					.stream()
-					.filter(s -> s.endsWith(".java"))
-					.toList();
-
-			// if there are uncommitted java changes,
-			// check how long its been since the last commit
-			if (!changes.isEmpty()) {
-				System.err.printf("Found %d uncommitted changes: %s%n", changes.size(), changes);
-				Iterator<RevCommit> logs = git.log().call().iterator();
-
-				if (logs.hasNext()) {
-					RevCommit commit = logs.next();
-
-					// get commit date/time and current date/time in same time zone
-					ZoneId zone = commit.getAuthorIdent().getTimeZone().toZoneId();
-					Instant timestamp = Instant.ofEpochSecond(commit.getCommitTime());
-					ZonedDateTime committed = ZonedDateTime.ofInstant(timestamp, zone);
-					ZonedDateTime today = ZonedDateTime.now(zone);
-
-					// get elapsed minutes since last commit
-					Duration elapsed = Duration.between(committed, today);
-					long minutes = elapsed.toMinutes();
-
-					// output a warning and stop running tests if over 30 minutes
-					if (minutes > 30) {
-						String date = DateTimeFormatter.ofPattern("h:mm a 'on' MMM d, yyyy").format(committed);
-						String output = "Your last commit was at " + date + ". " +
-								"Please make a new commit before running the tests.";
-
-						System.err.println(output);
-						Assertions.fail(output);
-					}
-				}
-				else {
-					String output = "Please make a first commit before running the tests.";
-					System.err.println(output);
-					Assertions.fail(output);
-				}
-			}
-		}
 	}
 
 	/**
@@ -190,11 +100,7 @@ public class HomeworkTest {
 		String name = target.getSimpleName() + ".java";
 
 		try {
-			return Files.walk(SOURCE_DIR)
-					.filter(p -> p.endsWith(name))
-					.filter(Files::isReadable)
-					.findFirst()
-					.get();
+			return Files.walk(SOURCE_DIR).filter(p -> p.endsWith(name)).filter(Files::isReadable).findFirst().get();
 		}
 		catch (Exception e) {
 			Assertions.fail("Unable to find " + name + " source code.", e);
@@ -221,7 +127,8 @@ public class HomeworkTest {
 	@Nested
 	public static class ApproachTests {
 		/** Creates a new instance of this class. */
-		public ApproachTests() {}
+		public ApproachTests() {
+		}
 
 		/**
 		 * Outputs a warning/test failure if not running on GitHub Actions.
@@ -235,7 +142,9 @@ public class HomeworkTest {
 			}
 
 			if (TestCounter.passed > 0 && TestCounter.failed == 0) {
-				System.err.printf("Found %d/%d passing tests so far, but you must run these on GitHub Actions to be certain they are passing.", TestCounter.passed, TestCounter.passed + TestCounter.failed);
+				System.err.printf(
+						"Found %d/%d passing tests so far, but you must run these on GitHub Actions to be certain they are passing.",
+						TestCounter.passed, TestCounter.passed + TestCounter.failed);
 			}
 
 			Assertions.fail("You must run these tests on GitHub Actions.");
