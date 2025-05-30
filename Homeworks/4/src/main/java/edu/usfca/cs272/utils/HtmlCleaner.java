@@ -34,7 +34,7 @@ public class HtmlCleaner {
 	 * @see String#replaceAll(String, String)
 	 */
 	public static String stripTags(String html) {
-		return html.replaceAll("<[/!\\?]?\\p{Alpha}[^>]*>", "");
+		return html.replaceAll("<[^>]*>", "");
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class HtmlCleaner {
 	 */
 	public static String stripEntities(String html) {
 		String unescapedHtml = StringEscapeUtils.unescapeHtml4(html);
-		return unescapedHtml.replaceAll("&(?:\\p{Lower}+|#\\d+|#x\\p{XDigit}+);", "");
+		return unescapedHtml.replaceAll("&\\w+;", "");
 	}
 
 	/**
@@ -112,7 +112,7 @@ public class HtmlCleaner {
 	 * @see String#replaceAll(String, String)
 	 */
 	public static String stripElement(String html, String name) {
-		String regex = String.format("(?si)<%s\\b[^>]*>.*?<\\s*/%s\\s*>", name, name);
+		String regex = String.format("(?si)<%s\\b[^>]*?>.*?<\\s*?/%s\\s*?>", name, name);
 		return html.replaceAll(regex, "");
 	}
 
@@ -149,45 +149,6 @@ public class HtmlCleaner {
 		html = stripTags(html);
 		html = stripEntities(html);
 		return html;
-	}
-
-	/**
-	 * Demonstrates this class.
-	 *
-	 * @param args unused
-	 */
-	public static void main(String[] args) {
-		String html = """
-				<!doctype html>
-				<html lang="en">
-				<head>
-					<meta charset="utf-8">
-					<title>Hello, world!</title>
-				</head>
-				<body>
-					<style>
-						body {
-							font-size: 12pt;
-						}
-					</style>
-
-					<p>Hello, <strong>world</strong>!</p>
-					<p>&copy; 2023</p>
-				</body>
-				</html>
-				""";
-
-		/*
-		 * The output should eventually look like:
-		 *
-		 * Hello, world! © 2023
-		 */
-
-		System.out.println("---------------------");
-		System.out.println(html);
-		System.out.println("---------------------");
-		System.out.println(stripHtml(html));
-		System.out.println("---------------------");
 	}
 
 	/** Prevent instantiating this class of static methods. */

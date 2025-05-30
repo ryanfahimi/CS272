@@ -10,10 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 /**
  * Outputs several simple data structures in "pretty" JSON format where newlines
@@ -34,12 +32,12 @@ public class JsonWriter {
 	/**
 	 * Represents a newline character.
 	 */
-	private static final String NEW_LINE = "\n";
+	private static final String NEW_LINE = System.lineSeparator();
 
 	/**
 	 * Represents a comma followed by a newline character.
 	 */
-	private static final String COMMA_NEW_LINE = ",\n";
+	private static final String COMMA_NEW_LINE = "," + NEW_LINE;
 
 	/**
 	 * Represents the left square bracket "[".
@@ -115,6 +113,64 @@ public class JsonWriter {
 	}
 
 	/**
+	 * Helper that creates a BufferedWriter for the given path and passes it to the
+	 * consumer.
+	 *
+	 * @param path the file path to write to
+	 * @param consumer the lambda that uses the writer
+	 * @throws IOException if an IO error occurs
+	 */
+	private static void withBufferedWriter(Path path, IOThrowingConsumer<BufferedWriter> consumer) throws IOException {
+		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
+			consumer.accept(writer);
+		}
+	}
+
+	/**
+	 * Helper that creates a StringWriter, passes it to the function, and returns
+	 * the result. Returns null if an IOException occurs.
+	 *
+	 * @param function the lambda that uses the writer
+	 * @return the result of applying the lambda
+	 */
+	private static String withStringWriter(IOThrowingFunction<StringWriter, String> function) {
+		StringWriter writer = new StringWriter();
+		try {
+			return function.apply(writer);
+		}
+		catch (IOException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * A generic helper for writing a collection of elements with a common JSON
+	 * format.
+	 *
+	 * @param <T> the type of elements in the collection
+	 * @param elements the collection to write
+	 * @param writer the writer to use
+	 * @param indent the current indentation level for the closing bracket
+	 * @param elementWriter a lambda that writes a single element
+	 * @throws IOException if an IO error occurs
+	 */
+	private static <T> void writeArray(Collection<T> elements, Writer writer, int indent,
+			IOThrowingConsumer<T> elementWriter) throws IOException {
+		writer.write(LEFT_BRACKET + NEW_LINE);
+		var it = elements.iterator();
+		if (it.hasNext()) {
+			elementWriter.accept(it.next());
+			while (it.hasNext()) {
+				writer.write(COMMA_NEW_LINE);
+				elementWriter.accept(it.next());
+			}
+			writer.write(NEW_LINE);
+		}
+		writeIndent(writer, indent);
+		writer.write(RIGHT_BRACKET);
+	}
+
+	/**
 	 * Writes the elements as a pretty JSON array.
 	 *
 	 * @param elements the elements to write
@@ -129,17 +185,21 @@ public class JsonWriter {
 	 * @see #writeIndent(String, Writer, int)
 	 */
 	public static void writeArray(Collection<? extends Number> elements, Writer writer, int indent) throws IOException {
-		writer.write(LEFT_BRACKET + NEW_LINE);
-		var it = elements.iterator();
-		if (it.hasNext()) {
-			writeIndent(it.next().toString(), writer, indent + 1);
-			while (it.hasNext()) {
-				writer.write(COMMA_NEW_LINE);
-				writeIndent(it.next().toString(), writer, indent + 1);
-			}
-			writer.write(NEW_LINE);
-		}
-		writeIndent(RIGHT_BRACKET, writer, indent);
+		writeArray(elements, writer, indent, element -> writeIndent(element.toString(), writer, indent + 1));
+	}
+
+	/**
+	 * Writes the collection as a pretty JSON array using the provided writer and no
+	 * initial indentation.
+	 *
+	 * @param elements the elements to write
+	 * @param writer the writer to use
+	 * @throws IOException if an IO error occurs
+	 *
+	 * @see #writeArray(Collection, Writer, int)
+	 */
+	public static void writeArray(Collection<? extends Number> elements, Writer writer) throws IOException {
+		writeArray(elements, writer, 0);
 	}
 
 	/**
@@ -154,9 +214,7 @@ public class JsonWriter {
 	 * @see #writeArray(Collection, Writer, int)
 	 */
 	public static void writeArray(Collection<? extends Number> elements, Path path) throws IOException {
-		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
-			writeArray(elements, writer, 0);
-		}
+		withBufferedWriter(path, writer -> writeArray(elements, writer));
 	}
 
 	/**
@@ -169,14 +227,50 @@ public class JsonWriter {
 	 * @see #writeArray(Collection, Writer, int)
 	 */
 	public static String writeArray(Collection<? extends Number> elements) {
-		try {
-			StringWriter writer = new StringWriter();
-			writeArray(elements, writer, 0);
-			return writer.toString();
+		return withStringWriter(writer -> { writeArray(elements, writer); return writer.toString(); });
+	}
+
+	/**
+	 * A generic helper for writing a map's entries with a common JSON format.
+	 *
+	 * @param <V> the type of values in the map
+	 * @param map the map to write
+	 * @param writer the writer to use
+	 * @param indent the current indentation level for the closing bracket
+	 * @param valueWriter a lambda that writes a single map value
+	 * @throws IOException if an IO error occurs
+	 */
+	private static <V> void writeObject(Map<String, V> map, Writer writer, int indent, IOThrowingConsumer<V> valueWriter)
+			throws IOException {
+		writer.write(LEFT_CURLY + NEW_LINE);
+		var it = map.entrySet().iterator();
+		if (it.hasNext()) {
+			writeEntry(it.next(), writer, indent + 1, valueWriter);
+			while (it.hasNext()) {
+				writer.write(COMMA_NEW_LINE);
+				writeEntry(it.next(), writer, indent + 1, valueWriter);
+			}
+			writer.write(NEW_LINE);
 		}
-		catch (IOException e) {
-			return null;
-		}
+		writeIndent(writer, indent);
+		writer.write(RIGHT_CURLY);
+	}
+
+	/**
+	 * A generic helper for writing a single map entry with a common JSON format.
+	 * 
+	 * @param <V> the type of values in the map
+	 * @param entry the entry to write
+	 * @param writer the writer to use
+	 * @param indent the current indentation level for the map key
+	 * @param valueWriter a lambda that writes a single map value
+	 * @throws IOException if an IO error occurs
+	 */
+	private static <V> void writeEntry(Entry<String, V> entry, Writer writer, int indent,
+			IOThrowingConsumer<V> valueWriter) throws IOException {
+		writeQuote(entry.getKey(), writer, indent);
+		writer.write(COLON_SPACE);
+		valueWriter.accept(entry.getValue());
 	}
 
 	/**
@@ -194,17 +288,21 @@ public class JsonWriter {
 	 * @see #writeIndent(String, Writer, int)
 	 */
 	public static void writeObject(Map<String, ? extends Number> elements, Writer writer, int indent) throws IOException {
-		writer.write(LEFT_CURLY + NEW_LINE);
-		var it = elements.entrySet().iterator();
-		if (it.hasNext()) {
-			writeObjectEntry(it.next(), writer, indent);
-			while (it.hasNext()) {
-				writer.write(COMMA_NEW_LINE);
-				writeObjectEntry(it.next(), writer, indent);
-			}
-			writer.write(NEW_LINE);
-		}
-		writeIndent(RIGHT_CURLY, writer, indent);
+		writeObject(elements, writer, indent, value -> writer.write(value.toString()));
+	}
+
+	/**
+	 * Writes the map as a pretty JSON object using the provided writer and no
+	 * initial indentation.
+	 *
+	 * @param elements the map to write
+	 * @param writer the writer to use
+	 * @throws IOException if an IO error occurs
+	 *
+	 * @see #writeObject(Map, Writer, int)
+	 */
+	public static void writeObject(Map<String, ? extends Number> elements, Writer writer) throws IOException {
+		writeObject(elements, writer, 0);
 	}
 
 	/**
@@ -219,9 +317,7 @@ public class JsonWriter {
 	 * @see #writeObject(Map, Writer, int)
 	 */
 	public static void writeObject(Map<String, ? extends Number> elements, Path path) throws IOException {
-		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
-			writeObject(elements, writer, 0);
-		}
+		withBufferedWriter(path, writer -> writeObject(elements, writer));
 	}
 
 	/**
@@ -234,14 +330,7 @@ public class JsonWriter {
 	 * @see #writeObject(Map, Writer, int)
 	 */
 	public static String writeObject(Map<String, ? extends Number> elements) {
-		try {
-			StringWriter writer = new StringWriter();
-			writeObject(elements, writer, 0);
-			return writer.toString();
-		}
-		catch (IOException e) {
-			return null;
-		}
+		return withStringWriter(writer -> { writeObject(elements, writer); return writer.toString(); });
 	}
 
 	/**
@@ -263,17 +352,20 @@ public class JsonWriter {
 	 */
 	public static void writeObjectArrays(Map<String, ? extends Collection<? extends Number>> elements, Writer writer,
 			int indent) throws IOException {
-		writer.write(LEFT_CURLY + NEW_LINE);
-		var it = elements.entrySet().iterator();
-		if (it.hasNext()) {
-			writeObjectArrayEntry(it.next(), writer, indent);
-			while (it.hasNext()) {
-				writer.write(COMMA_NEW_LINE);
-				writeObjectArrayEntry(it.next(), writer, indent);
-			}
-			writer.write(NEW_LINE);
-		}
-		writeIndent(RIGHT_CURLY, writer, indent);
+		writeObject(elements, writer, indent, value -> writeArray(value, writer, indent + 1));
+	}
+
+	/**
+	 * Writes the map whose values are collections as a pretty JSON object with
+	 * nested arrays using the provided writer and no initial indentation.
+	 *
+	 * @param elements the map to write
+	 * @param writer the writer to use
+	 * @throws IOException if an IO error occurs
+	 */
+	public static void writeObjectArrays(Map<String, ? extends Collection<? extends Number>> elements, Writer writer)
+			throws IOException {
+		writeObjectArrays(elements, writer, 0);
 	}
 
 	/**
@@ -289,9 +381,7 @@ public class JsonWriter {
 	 */
 	public static void writeObjectArrays(Map<String, ? extends Collection<? extends Number>> elements, Path path)
 			throws IOException {
-		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
-			writeObjectArrays(elements, writer, 0);
-		}
+		withBufferedWriter(path, writer -> writeObjectArrays(elements, writer));
 	}
 
 	/**
@@ -304,14 +394,7 @@ public class JsonWriter {
 	 * @see #writeObjectArrays(Map, Writer, int)
 	 */
 	public static String writeObjectArrays(Map<String, ? extends Collection<? extends Number>> elements) {
-		try {
-			StringWriter writer = new StringWriter();
-			writeObjectArrays(elements, writer, 0);
-			return writer.toString();
-		}
-		catch (IOException e) {
-			return null;
-		}
+		return withStringWriter(writer -> { writeObjectArrays(elements, writer); return writer.toString(); });
 	}
 
 	/**
@@ -334,16 +417,23 @@ public class JsonWriter {
 	public static void writeArrayObjects(Collection<? extends Map<String, ? extends Number>> elements, Writer writer,
 			int indent) throws IOException {
 		writer.write(LEFT_BRACKET + NEW_LINE);
-		var it = elements.iterator();
-		if (it.hasNext()) {
-			writeArrayObjectEntry(it.next(), writer, indent);
-			while (it.hasNext()) {
-				writer.write(COMMA_NEW_LINE);
-				writeArrayObjectEntry(it.next(), writer, indent);
-			}
-			writer.write(NEW_LINE);
-		}
-		writeIndent(RIGHT_BRACKET, writer, indent);
+		writeArray(elements, writer, indent, element -> {
+			writeIndent(writer, indent + 1);
+			writeObject(element, writer, indent + 1);
+		});
+	}
+
+	/**
+	 * Writes the collection whose elements are maps as a pretty JSON array with
+	 * nested objects using the provided writer and no initial indentation.
+	 *
+	 * @param elements the collection to write
+	 * @param writer the writer to use
+	 * @throws IOException if an IO error occurs
+	 */
+	public static void writeArrayObjects(Collection<? extends Map<String, ? extends Number>> elements, Writer writer)
+			throws IOException {
+		writeArrayObjects(elements, writer, 0);
 	}
 
 	/**
@@ -359,9 +449,7 @@ public class JsonWriter {
 	 */
 	public static void writeArrayObjects(Collection<? extends Map<String, ? extends Number>> elements, Path path)
 			throws IOException {
-		try (BufferedWriter writer = Files.newBufferedWriter(path, UTF_8)) {
-			writeArrayObjects(elements, writer, 0);
-		}
+		withBufferedWriter(path, writer -> writeArrayObjects(elements, writer));
 	}
 
 	/**
@@ -374,95 +462,10 @@ public class JsonWriter {
 	 * @see #writeArrayObjects(Collection)
 	 */
 	public static String writeArrayObjects(Collection<? extends Map<String, ? extends Number>> elements) {
-		try {
-			StringWriter writer = new StringWriter();
-			writeArrayObjects(elements, writer, 0);
-			return writer.toString();
-		}
-		catch (IOException e) {
-			return null;
-		}
-	}
-
-	/**
-	 * Helper method to write a key-value pair in a JSON object where the value is a
-	 * Number.
-	 *
-	 * @param entry the map entry containing the key and number value
-	 * @param writer the writer to output the JSON content
-	 * @param indent the current indentation level
-	 * @throws IOException if an IO error occurs while writing
-	 */
-	private static void writeObjectEntry(Map.Entry<String, ? extends Number> entry, Writer writer, int indent)
-			throws IOException {
-		writeQuote(entry.getKey(), writer, indent + 1);
-		writer.write(COLON_SPACE);
-		writer.write(entry.getValue().toString());
-	}
-
-	/**
-	 * Helper method to write a key-value pair in a JSON object where the value is a
-	 * collection of Numbers.
-	 *
-	 * @param entry the map entry containing the key and collection of numbers
-	 * @param writer the writer to output the JSON content
-	 * @param indent the current indentation level
-	 * @throws IOException if an IO error occurs while writing
-	 */
-	private static void writeObjectArrayEntry(Map.Entry<String, ? extends Collection<? extends Number>> entry,
-			Writer writer, int indent) throws IOException {
-		writeQuote(entry.getKey(), writer, indent + 1);
-		writer.write(COLON_SPACE);
-		writeArray(entry.getValue(), writer, indent + 1);
-	}
-
-	/**
-	 * Helper method to write a JSON object as an element within a JSON array.
-	 *
-	 * @param element the JSON object represented as a map with String keys and
-	 *   Number values
-	 * @param writer the writer to output the JSON content
-	 * @param indent the current indentation level
-	 * @throws IOException if an IO error occurs while writing
-	 */
-	private static void writeArrayObjectEntry(Map<String, ? extends Number> element, Writer writer, int indent)
-			throws IOException {
-		writeIndent(writer, indent + 1);
-		writeObject(element, writer, indent + 1);
+		return withStringWriter(writer -> { writeArrayObjects(elements, writer); return writer.toString(); });
 	}
 
 	/** Prevent instantiating this class of static methods. */
 	private JsonWriter() {
-	}
-
-	/**
-	 * Demonstrates this class.
-	 *
-	 * @param args unused
-	 */
-	public static void main(String[] args) {
-		Set<Integer> empty = Collections.emptySet();
-		Set<Integer> single = Set.of(42);
-		List<Integer> simple = List.of(65, 66, 67);
-
-		System.out.println("\nArrays:");
-		System.out.println(writeArray(empty));
-		System.out.println(writeArray(single));
-		System.out.println(writeArray(simple));
-
-		System.out.println("\nObjects:");
-		System.out.println(writeObject(Collections.emptyMap()));
-		System.out.println(writeObject(Map.of("hello", 42)));
-		System.out.println(writeObject(Map.of("hello", 42, "world", 67)));
-
-		System.out.println("\nNested Arrays:");
-		System.out.println(writeObjectArrays(Collections.emptyMap()));
-		System.out.println(writeObjectArrays(Map.of("hello", single)));
-		System.out.println(writeObjectArrays(Map.of("hello", single, "world", simple)));
-
-		System.out.println("\nNested Objects:");
-		System.out.println(writeArrayObjects(Collections.emptyList()));
-		System.out.println(writeArrayObjects(Set.of(Map.of("hello", 3.12))));
-		System.out.println(writeArrayObjects(Set.of(Map.of("hello", 3.12, "world", 2.04), Map.of("apple", 0.04))));
 	}
 }

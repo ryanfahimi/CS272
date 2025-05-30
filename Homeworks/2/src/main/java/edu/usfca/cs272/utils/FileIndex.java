@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -122,25 +121,4 @@ public class FileIndex implements ForwardIndex<Path> {
 				.map(entry -> entry.getKey() + " -> " + entry.getValue())
 				.collect(Collectors.joining(System.lineSeparator()));
 	}
-
-	/**
-	 * Demonstrates this class.
-	 *
-	 * @param args unused
-	 */
-	public static void main(String[] args) {
-		ForwardIndex<Path> index = new FileIndex();
-
-		Path hello = Path.of("hello.txt");
-		Path world = Path.of("world.txt");
-
-		index.add(hello, List.of("hello", "hola", "aloha", "ciao"));
-		index.add(world, List.of("earth", "mars", "venus", "pluto"));
-
-		System.out.println(index);
-		System.out.println(index.view());
-		System.out.println(index.view(hello));
-		System.out.println(index.view(world));
-	}
-
 }

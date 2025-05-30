@@ -64,7 +64,7 @@ public class LinkFinder {
 
 			URI absoluteUri = toAbsolute(base, href);
 
-			if (absoluteUri != null && isHttp(absoluteUri)) {
+			if (isHttp(absoluteUri)) {
 				links.add(absoluteUri);
 			}
 		}
@@ -95,6 +95,23 @@ public class LinkFinder {
 	}
 
 	/**
+	 * Attempts to clean a URI provided as a string. Converts the string to a URI,
+	 * normalizes it, removes fragments, and ensures a default path if necessary. If
+	 * the string cannot be converted to a valid URI, returns null.
+	 *
+	 * @param uri the URI as a string to clean
+	 * @return the cleaned URI or null if invalid
+	 */
+	public static URI clean(String uri) {
+		try {
+			return clean(toUri(uri));
+		}
+		catch (NullPointerException | URISyntaxException e) {
+			return null;
+		}
+	}
+
+	/**
 	 * Normalizes and removes the fragment from a URI. For non-opaque hierarchical
 	 * URIs, will also make sure the path is default to / if it is missing.
 	 *
@@ -109,13 +126,12 @@ public class LinkFinder {
 		String path = cleaned.getPath();
 
 		try {
-			// only non-opque absolute URIs have / as the default path if missing
 			cleaned = !cleaned.isOpaque() && cleaned.isAbsolute() && (path == null || path.isBlank())
 					? new URI(cleaned.getScheme(), cleaned.getAuthority(), "/", cleaned.getQuery(), null)
 					: new URI(cleaned.getScheme(), cleaned.getSchemeSpecificPart(), null);
 		}
 		catch (URISyntaxException ignored) {
-			assert false; // should never occur
+			assert false;
 		}
 
 		return cleaned;
@@ -135,16 +151,16 @@ public class LinkFinder {
 	 */
 	public static URI toUri(String link) throws URISyntaxException {
 		try {
-			return new URI(link); // only works if no encoding needed
+			return new URI(link);
 		}
 		catch (URISyntaxException e) {
 			Matcher matcher = URI_PARTS.matcher(link);
 
-			if (matcher.matches()) { // use constructor that encodes special characters
+			if (matcher.matches()) {
 				return new URI(matcher.group(1), matcher.group(2), matcher.group(3));
 			}
 
-			throw e; // re-throw if unable to convert
+			throw e;
 		}
 	}
 
@@ -196,45 +212,6 @@ public class LinkFinder {
 	 * @see URI
 	 */
 	public static Pattern URI_PARTS = Pattern.compile("^(?:([^:]*):)?([^#]+)?(?:#(.*))?$");
-
-	/**
-	 * Demonstrates this class.
-	 *
-	 * @param args unused
-	 * @throws Exception if any issues occur
-	 */
-	public static void main(String[] args) throws Exception {
-		// this demonstrates cleaning
-		String pythonLink = "https://docs.python.org/3/library/functions.html?highlight=string#format";
-		URI pythonUri = toUri(pythonLink);
-		URI pythonClean = clean(pythonUri);
-
-		System.out.println(pythonLink);
-		System.out.println(pythonClean);
-		System.out.println();
-
-		// this demonstrates encoding
-		String googleLink = "https://www.google.com/search?q=hello world";
-		URI googleUri = toUri(googleLink);
-
-		System.out.println(googleLink);
-		System.out.println(googleUri);
-		System.out.println();
-
-		// this demonstrates a non-HTTP (but valid) URI
-		String emailLink = "mailto:username@example.edu";
-		URI emailUri = toUri(emailLink);
-		System.out.println(emailLink);
-		System.out.println(emailUri);
-		System.out.println();
-
-		// this demonstrates converting to absolute
-		String relative = "index.html?q=hello world#top";
-		System.out.println(relative);
-		System.out.println(toAbsolute(pythonUri, relative));
-		System.out.println(toAbsolute(googleUri, relative));
-		System.out.println(toAbsolute(emailUri, relative)); // invalid base
-	}
 
 	/** Prevent instantiating this class of static methods. */
 	private LinkFinder() {

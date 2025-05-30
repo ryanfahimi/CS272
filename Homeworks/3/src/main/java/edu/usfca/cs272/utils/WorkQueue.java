@@ -71,6 +71,7 @@ public class WorkQueue {
 	 */
 	public void execute(Runnable task) throws IllegalStateException {
 		if (shutdown) {
+			logger.error("Attempted to submit task while work queue is shutdown.");
 			throw new IllegalStateException("Work queue is shutdown.");
 		}
 
@@ -107,7 +108,6 @@ public class WorkQueue {
 	public synchronized void finish() {
 		try {
 			while (pending > 0) {
-				logger.trace("Waiting to finish (pending: {})", pending);
 				this.wait();
 			}
 		}
@@ -126,6 +126,7 @@ public class WorkQueue {
 	 */
 	public void join() {
 		try {
+			logger.debug("Join called: waiting for all tasks to finish and workers to terminate.");
 			finish();
 			shutdown();
 

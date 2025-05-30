@@ -53,13 +53,10 @@ public class HttpsFetcher {
 				InputStreamReader input = new InputStreamReader(socket.getInputStream(), UTF_8);
 				BufferedReader response = new BufferedReader(input);
 		) {
-			// make HTTP GET request of the web server
 			printGetRequest(request, uri);
 
-			// the headers will be first in the response
 			Map<String, List<String>> headers = processHttpHeaders(response);
 
-			// read everything remaining in socket reader as the content
 			List<String> content = response.lines().toList();
 			headers.put("content", content);
 
@@ -127,12 +124,9 @@ public class HttpsFetcher {
 	public static Map<String, List<String>> processHttpHeaders(BufferedReader response) throws IOException {
 		Map<String, List<String>> results = new HashMap<>();
 
-		// first line will be the http status line (status code and description)
-		// null used by early Java versions
 		String line = response.readLine();
 		results.put(null, List.of(line));
 
-		// remaining lines until first blank line are the other headers
 		while ((line = response.readLine()) != null && !line.isBlank()) {
 			String[] split = line.split(":\\s+", 2);
 			assert split.length == 2;

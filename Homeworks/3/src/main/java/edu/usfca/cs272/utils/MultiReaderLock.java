@@ -46,7 +46,7 @@ public class MultiReaderLock {
 	private Thread activeWriter;
 
 	/** The log4j2 logger. */
-	private static final Logger log = LogManager.getLogger();
+	private static final Logger logger = LogManager.getLogger();
 
 	/**
 	 * The lock object used for synchronized access of readers and writers. For
@@ -71,6 +71,7 @@ public class MultiReaderLock {
 		writers = 0;
 
 		activeWriter = null;
+		logger.debug("Initialized MultiReaderLock with 0 readers and 0 writers.");
 	}
 
 	/**
@@ -157,6 +158,7 @@ public class MultiReaderLock {
 	private class ReadLock implements SimpleLock {
 		/** Creates a new instance of this class. */
 		private ReadLock() {
+			logger.debug("ReadLock created.");
 		}
 
 		/**
@@ -177,7 +179,7 @@ public class MultiReaderLock {
 				}
 			}
 			catch (InterruptedException ex) {
-				log.catching(Level.DEBUG, ex);
+				logger.catching(Level.DEBUG, ex);
 				Thread.currentThread().interrupt();
 			}
 		}
@@ -192,6 +194,7 @@ public class MultiReaderLock {
 		public void unlock() throws IllegalStateException {
 			synchronized (lock) {
 				if (readers <= 0) {
+					logger.error("Illegal attempt to unlock read lock when no readers are present.");
 					throw new IllegalStateException("No readers to unlock.");
 				}
 				readers--;
@@ -208,6 +211,7 @@ public class MultiReaderLock {
 	private class WriteLock implements SimpleLock {
 		/** Creates a new instance of this class. */
 		private WriteLock() {
+			logger.debug("WriteLock created.");
 		}
 
 		/**
@@ -229,7 +233,7 @@ public class MultiReaderLock {
 				}
 			}
 			catch (InterruptedException ex) {
-				log.catching(Level.DEBUG, ex);
+				logger.catching(Level.DEBUG, ex);
 				Thread.currentThread().interrupt();
 			}
 		}
@@ -246,9 +250,13 @@ public class MultiReaderLock {
 		public void unlock() throws IllegalStateException, ConcurrentModificationException {
 			synchronized (lock) {
 				if (writers <= 0) {
+					logger.error("Illegal attempt to unlock write lock when no writers are present.");
 					throw new IllegalStateException("No writers to unlock.");
 				}
 				if (!isActiveWriter()) {
+					logger.error(
+							"Illegal attempt to unlock write lock by a thread that does not hold it. Current thread: {}, Active writer: {}",
+							Thread.currentThread().getName(), activeWriter != null ? activeWriter.getName() : "null");
 					throw new ConcurrentModificationException("The current thread does not hold the write lock.");
 				}
 				writers--;
