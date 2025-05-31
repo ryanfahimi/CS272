@@ -24,13 +24,13 @@ jobs:
 
       - name: Build with Maven
         working-directory: 'Project/Search Engine'
-        run: mvn -B clean package       # produces target/…jar
+        run: mvn -B clean package
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: 'Project/Search Engine/target/*-shaded.jar'
+          path: 'Project/Search Engine/target/*.jar'
 
   deploy:
     runs-on: ubuntu-latest
@@ -47,7 +47,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-app
-          path: 'Project/Search Engine/target/*-shaded.jar'
 
       - name: Azure login
         uses: azure/login@v2
