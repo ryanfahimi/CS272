@@ -171,7 +171,6 @@
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <version>${versions.jakarta.servlet}</version>
-            <scope>provided</scope>
         </dependency>
 
         <!-- for jetty -->
