@@ -253,8 +253,10 @@ public class Driver {
 	private static void processServerFlag(ArgumentParser argParser, ThreadSafeInvertedIndex invertedIndex) {
 		if (argParser.hasFlag(SERVER_FLAG)) {
 			try {
-				SearchEngine.run(argParser.getPositiveInteger(SERVER_FLAG, DEFAULT_PORT), invertedIndex,
-						argParser.getPath(TEXT_FLAG, null));
+				String portEnv = System.getenv("PORT");
+				int port = portEnv != null ? Integer.parseInt(portEnv)
+						: argParser.getPositiveInteger(SERVER_FLAG, DEFAULT_PORT);
+				SearchEngine.run(port, invertedIndex, argParser.getPath(TEXT_FLAG, null));
 			}
 			catch (IOException e) {
 				logger.error("Error reading or writing index.html", e);
