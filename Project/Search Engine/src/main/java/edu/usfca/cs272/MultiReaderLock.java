@@ -46,7 +46,7 @@ public class MultiReaderLock {
 	private Thread activeWriter;
 
 	/** The log4j2 logger. */
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LogManager.getLogger(MultiReaderLock.class);
 
 	/**
 	 * The lock object used for synchronized access of readers and writers. For
