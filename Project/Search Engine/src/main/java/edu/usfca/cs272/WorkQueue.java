@@ -29,7 +29,7 @@ public class WorkQueue {
 	private volatile boolean shutdown;
 
 	/** Logger used for this class. */
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger logger = LogManager.getLogger(WorkQueue.class);
 
 	/** The amount of pending (or unfinished) work. */
 	private int pending;
