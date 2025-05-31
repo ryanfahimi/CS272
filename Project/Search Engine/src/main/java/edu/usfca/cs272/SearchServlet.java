@@ -2,11 +2,11 @@ package edu.usfca.cs272;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
@@ -86,7 +86,12 @@ public class SearchServlet extends HttpServlet {
 	 * @throws IOException if the HTML template cannot be read
 	 */
 	public SearchServlet() throws IOException {
-		this.htmlTemplate = Files.readString(SearchEngine.RESOURCES.resolve("index.html"), StandardCharsets.UTF_8);
+		try (InputStream is = SearchServlet.class.getResourceAsStream("/index.html")) {
+			if (is == null) {
+				throw new IOException("Could not find index.html in classpath");
+			}
+			this.htmlTemplate = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+		}
 	}
 
 	/**
