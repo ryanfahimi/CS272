@@ -47,6 +47,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: java-app
+          path: 'Project/Search Engine/target/*-shaded.jar'
 
       - name: Azure login
         uses: azure/login@v2
