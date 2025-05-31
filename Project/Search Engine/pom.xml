@@ -101,7 +101,7 @@
                             </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>edu.usfca.cs272.SearchEngine</mainClass>
+                                    <mainClass>edu.usfca.cs272.Driver</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
