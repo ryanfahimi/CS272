@@ -254,7 +254,6 @@ public class Driver {
 		if (argParser.hasFlag(SERVER_FLAG)) {
 			try {
 				String portEnv = System.getenv("PORT");
-				System.out.println(portEnv);
 				int port = portEnv != null ? Integer.parseInt(portEnv)
 						: argParser.getPositiveInteger(SERVER_FLAG, DEFAULT_PORT);
 				SearchEngine.run(port, invertedIndex, argParser.getPath(TEXT_FLAG, null));
