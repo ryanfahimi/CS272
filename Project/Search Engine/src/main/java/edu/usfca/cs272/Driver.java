@@ -256,6 +256,7 @@ public class Driver {
 				String portEnv = System.getenv("PORT");
 				int port = portEnv != null ? Integer.parseInt(portEnv)
 						: argParser.getPositiveInteger(SERVER_FLAG, DEFAULT_PORT);
+				logger.debug("Running server with port: {}", port);
 				SearchEngine.run(port, invertedIndex, argParser.getPath(TEXT_FLAG, null));
 			}
 			catch (IOException e) {

@@ -65,6 +65,7 @@ public class SearchEngine {
 	 * @throws Exception if unable to start and run server
 	 */
 	public static void run(int port, ThreadSafeInvertedIndex invertedIndex, Path textFiles) throws Exception {
+		logger.info("Started running SearchEngine");
 		SearchEngine.invertedIndex = invertedIndex;
 
 		List<Handler> handlers = new ArrayList<>();
