@@ -2,7 +2,7 @@
 
 This repository contains code from CS 272 at the University of San Francisco.
 
-The course focused on building a scalable, multi-threaded **search engine** in Java. Students developed the project incrementally through weekly milestones and one-on-one code reviews, covering:
+The course focused on building a scalable, multi-threaded [**search engine**](https://searchengine-degahua9bzere2e2.westus-01.azurewebsites.net/). Students developed the project incrementally through weekly milestones and one-on-one code reviews, covering:
 - Thread-safe inverted indexing and parallel search
 - Web crawling and a dynamic servlet-based search interface
 - Software design, testing, and refactoring best practices
