@@ -2,9 +2,7 @@ package edu.usfca.cs272;
 
 import static opennlp.tools.stemmer.snowball.SnowballStemmer.ALGORITHM.ENGLISH;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.UncheckedIOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -95,17 +93,10 @@ public class WebCrawler {
 	public static void indexText(String source, String text, InvertedIndex invertedIndex, Stemmer stemmer)
 			throws IOException {
 		int position = 1;
-		try (BufferedReader reader = new BufferedReader(new StringReader(text))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				if (!line.isBlank()) {
-					for (String word : FileStemmer.parse(line)) {
-						if (!word.isEmpty()) {
-							invertedIndex.add(stemmer.stem(word).toString(), source, position);
-							position++;
-						}
-					}
-				}
+		for (String word : FileStemmer.parse(text)) {
+			if (!word.isEmpty()) {
+				invertedIndex.add(stemmer.stem(word).toString(), source, position);
+				position++;
 			}
 		}
 	}
