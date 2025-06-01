@@ -17,8 +17,8 @@
 		<Logger name="org.eclipse.jgit" level="OFF" additivity="false"/>
 		
 			
-		<Root level="DEBUG">
-			<AppenderRef ref="Console" level="DEBUG" />
+		<Root level="OFF">
+			<AppenderRef ref="Console" level="OFF" />
 			<AppenderRef ref="FileLog" level="OFF"  />
 		</Root>
 	</Loggers>
