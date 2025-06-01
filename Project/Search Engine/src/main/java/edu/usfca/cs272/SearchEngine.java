@@ -105,7 +105,7 @@ public class SearchEngine {
 
 		ServletContextHandler servletContext = new ServletContextHandler();
 		if (!STATIC_RESOURCE_EXISTS) {
-			servletContext.addServlet(StaticServlet.class, STATIC_PATH + "/*");
+			servletContext.addServlet(StaticServlet.class, String.format("%s/*", STATIC_PATH));
 		}
 		servletContext.addServlet(new ServletHolder(new SearchServlet()), "/");
 		servletContext.addServlet(DownloadServlet.class, DOWNLOAD_PATH);
