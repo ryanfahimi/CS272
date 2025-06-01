@@ -84,15 +84,8 @@ public class SearchEngine {
 			handlers.add(textResourceContext);
 		}
 
-		if (Files.exists(RESOURCES.resolve("static"))) {
-			ResourceHandler staticResourceHandler = new ResourceHandler();
-			Resource staticBaseResource = ResourceFactory.of(staticResourceHandler).newResource(RESOURCES.resolve("static"));
-			staticResourceHandler.setBaseResource(staticBaseResource);
-			ContextHandler staticResourceContext = new ContextHandler(staticResourceHandler, STATIC_PATH);
-			handlers.add(staticResourceContext);
-		}
-
 		ServletContextHandler servletContext = new ServletContextHandler();
+		servletContext.addServlet(StaticServlet.class, "/static/*");
 		servletContext.addServlet(new ServletHolder(new SearchServlet()), "/");
 		servletContext.addServlet(DownloadServlet.class, "/download");
 		handlers.add(servletContext);
