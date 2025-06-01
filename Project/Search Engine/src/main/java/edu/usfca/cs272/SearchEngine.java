@@ -25,14 +25,25 @@ public class SearchEngine {
 	/** Path to the text files directory. */
 	private static Path textFiles = null;
 
-	/** Path to the resources directory containing templates and static files. */
+	/**
+	 * Path to the resources directory containing texts, templates and static files.
+	 */
 	public static final Path RESOURCES = Path.of("src", "main", "resources").toAbsolutePath().normalize();
+
+	/** Path to static resource. */
+	public static final Path STATIC_RESOURCE = RESOURCES.resolve("static");
+
+	/** True if path to static resource exists in the file system */
+	public static final boolean STATIC_RESOURCE_EXISTS = Files.exists(STATIC_RESOURCE);
+
+	/** URL path for serving static files. */
+	public static final String STATIC_PATH = "/static";
 
 	/** URL path for serving text files. */
 	public static final String TEXT_FILE_PATH = "/files";
 
-	/** URL path for serving static files. */
-	public static final String STATIC_PATH = "/static";
+	/** URL path for download servlet */
+	public static final String DOWNLOAD_PATH = "/download";
 
 	/** Admin password for shutting down Search Engine */
 	private static final String PASSWORD = "admin";
@@ -84,10 +95,20 @@ public class SearchEngine {
 			handlers.add(textResourceContext);
 		}
 
+		if (STATIC_RESOURCE_EXISTS) {
+			ResourceHandler staticResourceHandler = new ResourceHandler();
+			Resource staticBaseResource = ResourceFactory.of(staticResourceHandler).newResource(STATIC_RESOURCE);
+			staticResourceHandler.setBaseResource(staticBaseResource);
+			ContextHandler staticResourceContext = new ContextHandler(staticResourceHandler, STATIC_PATH);
+			handlers.add(staticResourceContext);
+		}
+
 		ServletContextHandler servletContext = new ServletContextHandler();
-		servletContext.addServlet(StaticServlet.class, "/static/*");
+		if (!STATIC_RESOURCE_EXISTS) {
+			servletContext.addServlet(StaticServlet.class, STATIC_PATH + "/*");
+		}
 		servletContext.addServlet(new ServletHolder(new SearchServlet()), "/");
-		servletContext.addServlet(DownloadServlet.class, "/download");
+		servletContext.addServlet(DownloadServlet.class, DOWNLOAD_PATH);
 		handlers.add(servletContext);
 
 		server.setHandler(new Handler.Sequence(handlers));
