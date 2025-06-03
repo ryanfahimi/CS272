@@ -284,7 +284,7 @@ public class SearchServlet extends HttpServlet {
 		return """
 				<div class="flex items-center p-4 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
 				  %s
-				  <div class="flex-1 min-w-0 ml-4">
+				  <div class="flex-1 min-w-0 ml-4 pr-4">
 				    <a href="%s"
 				       class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 block truncate
 				              visited:text-purple-600 dark:visited:text-purple-400 visited:hover:text-purple-800 dark:visited:hover:text-purple-300">
