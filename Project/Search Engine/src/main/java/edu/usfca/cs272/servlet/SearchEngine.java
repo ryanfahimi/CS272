@@ -1,4 +1,4 @@
-package edu.usfca.cs272;
+package edu.usfca.cs272.servlet;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,6 +17,8 @@ import org.eclipse.jetty.server.handler.ShutdownHandler;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 
+import edu.usfca.cs272.index.ThreadSafeInvertedIndex;
+
 /**
  * A web server that provides a search interface for the inverted index. Allows
  * users to search through indexed files and URLs.
@@ -30,11 +32,11 @@ public class SearchEngine {
 	 */
 	public static final Path RESOURCES = Path.of("src", "main", "resources").toAbsolutePath().normalize();
 
+	/** True if path to resources exists in the file system */
+	public static final boolean RESOURCES_EXIST = Files.exists(RESOURCES);
+
 	/** Path to static resource. */
 	public static final Path STATIC_RESOURCE = RESOURCES.resolve("static");
-
-	/** True if path to static resource exists in the file system */
-	public static final boolean STATIC_RESOURCE_EXISTS = Files.exists(STATIC_RESOURCE);
 
 	/** URL path for serving static files. */
 	public static final String STATIC_PATH = "/static";
@@ -95,7 +97,7 @@ public class SearchEngine {
 			handlers.add(textResourceContext);
 		}
 
-		if (STATIC_RESOURCE_EXISTS) {
+		if (RESOURCES_EXIST) {
 			ResourceHandler staticResourceHandler = new ResourceHandler();
 			Resource staticBaseResource = ResourceFactory.of(staticResourceHandler).newResource(STATIC_RESOURCE);
 			staticResourceHandler.setBaseResource(staticBaseResource);
@@ -104,7 +106,7 @@ public class SearchEngine {
 		}
 
 		ServletContextHandler servletContext = new ServletContextHandler();
-		if (!STATIC_RESOURCE_EXISTS) {
+		if (!RESOURCES_EXIST) {
 			servletContext.addServlet(StaticServlet.class, String.format("%s/*", STATIC_PATH));
 		}
 		servletContext.addServlet(new ServletHolder(new SearchServlet()), "/");

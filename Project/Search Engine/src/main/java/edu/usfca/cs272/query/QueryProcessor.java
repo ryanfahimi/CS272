@@ -1,4 +1,4 @@
-package edu.usfca.cs272;
+package edu.usfca.cs272.query;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.SortedSet;
+
+import edu.usfca.cs272.index.InvertedIndex;
 
 /**
  * An interface for processing search queries and storing their corresponding

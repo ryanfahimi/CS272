@@ -1,4 +1,4 @@
-package edu.usfca.cs272;
+package edu.usfca.cs272.util;
 
 import java.util.LinkedList;
 

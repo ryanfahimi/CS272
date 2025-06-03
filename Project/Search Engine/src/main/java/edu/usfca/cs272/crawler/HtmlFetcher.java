@@ -1,4 +1,4 @@
-package edu.usfca.cs272;
+package edu.usfca.cs272.crawler;
 
 import java.io.BufferedReader;
 import java.io.IOException;

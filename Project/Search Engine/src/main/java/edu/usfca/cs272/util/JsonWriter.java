@@ -1,4 +1,4 @@
-package edu.usfca.cs272;
+package edu.usfca.cs272.util;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import edu.usfca.cs272.index.InvertedIndex;
 
 /**
  * Outputs several simple data structures in "pretty" JSON format where newlines

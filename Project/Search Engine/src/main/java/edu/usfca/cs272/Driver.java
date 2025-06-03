@@ -10,6 +10,19 @@ import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.usfca.cs272.cli.ArgumentParser;
+import edu.usfca.cs272.crawler.WebCrawler;
+import edu.usfca.cs272.index.ConcurrentTextFileIndexer;
+import edu.usfca.cs272.index.InvertedIndex;
+import edu.usfca.cs272.index.TextFileIndexer;
+import edu.usfca.cs272.index.ThreadSafeInvertedIndex;
+import edu.usfca.cs272.query.ConcurrentQueryProcessor;
+import edu.usfca.cs272.query.QueryProcessor;
+import edu.usfca.cs272.query.SerialQueryProcessor;
+import edu.usfca.cs272.servlet.SearchEngine;
+import edu.usfca.cs272.util.IOThrowingConsumer;
+import edu.usfca.cs272.util.WorkQueue;
+
 /**
  * Class responsible for running this project based on the provided command-line
  * arguments. See the README for details.

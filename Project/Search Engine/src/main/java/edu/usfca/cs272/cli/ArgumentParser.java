@@ -1,4 +1,4 @@
-package edu.usfca.cs272;
+package edu.usfca.cs272.cli;
 
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;

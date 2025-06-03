@@ -1,4 +1,4 @@
-package edu.usfca.cs272;
+package edu.usfca.cs272.index;
 
 import static opennlp.tools.stemmer.snowball.SnowballStemmer.ALGORITHM.ENGLISH;
 
@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.usfca.cs272.util.WorkQueue;
 import opennlp.tools.stemmer.snowball.SnowballStemmer;
 
 /**

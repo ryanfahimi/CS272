@@ -1,4 +1,4 @@
-package edu.usfca.cs272;
+package edu.usfca.cs272.servlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +19,10 @@ import java.util.stream.Collectors;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.text.StringSubstitutor;
 
-import edu.usfca.cs272.InvertedIndex.SearchResult;
+import edu.usfca.cs272.crawler.LinkFinder;
+import edu.usfca.cs272.index.FileStemmer;
+import edu.usfca.cs272.index.InvertedIndex;
+import edu.usfca.cs272.index.InvertedIndex.SearchResult;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -87,11 +90,12 @@ public class SearchServlet extends HttpServlet {
 	 * @throws IOException if the HTML template cannot be read
 	 */
 	public SearchServlet() throws IOException {
-		if (SearchEngine.STATIC_RESOURCE_EXISTS) {
-			this.htmlTemplate = Files.readString(SearchEngine.RESOURCES.resolve("index.html"), StandardCharsets.UTF_8);
+		if (SearchEngine.RESOURCES_EXIST) {
+			this.htmlTemplate = Files.readString(SearchEngine.RESOURCES.resolve("templates/index.html"),
+					StandardCharsets.UTF_8);
 		}
 		else {
-			try (InputStream is = SearchServlet.class.getResourceAsStream("/index.html")) {
+			try (InputStream is = SearchServlet.class.getResourceAsStream("/templates/index.html")) {
 				if (is == null) {
 					throw new IOException("Could not find index.html in classpath");
 				}

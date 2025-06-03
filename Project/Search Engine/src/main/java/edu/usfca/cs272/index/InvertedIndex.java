@@ -1,4 +1,4 @@
-package edu.usfca.cs272;
+package edu.usfca.cs272.index;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -18,6 +18,8 @@ import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import edu.usfca.cs272.util.JsonWriter;
 
 /**
  * Represents an inverted index that maps words to their source locations and

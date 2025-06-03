@@ -1,4 +1,4 @@
-package edu.usfca.cs272;
+package edu.usfca.cs272.index;
 
 import java.io.IOException;
 import java.nio.file.FileVisitOption;

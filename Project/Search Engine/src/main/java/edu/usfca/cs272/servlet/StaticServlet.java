@@ -1,4 +1,4 @@
-package edu.usfca.cs272;
+package edu.usfca.cs272.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
