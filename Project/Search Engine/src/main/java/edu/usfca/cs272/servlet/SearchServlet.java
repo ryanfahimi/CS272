@@ -20,9 +20,9 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.text.StringSubstitutor;
 
 import edu.usfca.cs272.crawler.LinkFinder;
-import edu.usfca.cs272.index.FileStemmer;
 import edu.usfca.cs272.index.InvertedIndex;
 import edu.usfca.cs272.index.InvertedIndex.SearchResult;
+import edu.usfca.cs272.util.FileStemmer;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;

@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.usfca.cs272.util.MultiReaderLock;
+import threads.MultiReaderLock;
 
 /**
  * Represents an inverted index that maps words to their source locations and

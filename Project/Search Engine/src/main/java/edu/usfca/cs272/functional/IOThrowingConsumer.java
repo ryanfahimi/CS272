@@ -1,4 +1,4 @@
-package edu.usfca.cs272.util;
+package edu.usfca.cs272.functional;
 
 import java.io.IOException;
 

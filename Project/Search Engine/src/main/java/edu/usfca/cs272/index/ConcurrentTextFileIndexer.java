@@ -9,8 +9,8 @@ import java.nio.file.Path;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.usfca.cs272.util.WorkQueue;
 import opennlp.tools.stemmer.snowball.SnowballStemmer;
+import threads.WorkQueue;
 
 /**
  * ConcurrentTextFileIndexer indexes text files concurrently using a thread-safe

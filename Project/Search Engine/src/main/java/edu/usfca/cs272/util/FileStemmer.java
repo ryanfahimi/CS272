@@ -1,4 +1,4 @@
-package edu.usfca.cs272.index;
+package edu.usfca.cs272.util;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static opennlp.tools.stemmer.snowball.SnowballStemmer.ALGORITHM.ENGLISH;

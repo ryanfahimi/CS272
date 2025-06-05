@@ -12,8 +12,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.function.Function;
 
-import edu.usfca.cs272.index.FileStemmer;
 import edu.usfca.cs272.index.InvertedIndex;
+import edu.usfca.cs272.util.FileStemmer;
 import edu.usfca.cs272.util.JsonWriter;
 import opennlp.tools.stemmer.Stemmer;
 import opennlp.tools.stemmer.snowball.SnowballStemmer;

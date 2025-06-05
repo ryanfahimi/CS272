@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import edu.usfca.cs272.functional.IOThrowingConsumer;
+import edu.usfca.cs272.functional.IOThrowingFunction;
 import edu.usfca.cs272.index.InvertedIndex;
 
 /**
