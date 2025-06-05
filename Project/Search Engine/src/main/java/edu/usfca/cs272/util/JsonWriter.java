@@ -159,7 +159,8 @@ public class JsonWriter {
 	 */
 	private static <T> void writeArray(Collection<T> elements, Writer writer, int indent,
 			IOThrowingConsumer<T> elementWriter) throws IOException {
-		writer.write(LEFT_BRACKET + NEW_LINE);
+		writer.write(LEFT_BRACKET);
+		writer.write(NEW_LINE);
 		var it = elements.iterator();
 		if (it.hasNext()) {
 			elementWriter.accept(it.next());
@@ -544,7 +545,8 @@ public class JsonWriter {
 	private static void writeSearchResult(InvertedIndex.SearchResult searchResult, Writer writer, int indent)
 			throws IOException {
 		writeIndent(writer, indent);
-		writer.write(LEFT_CURLY + NEW_LINE);
+		writer.write(LEFT_CURLY);
+		writer.write(NEW_LINE);
 		writeQuote("count", writer, indent + 1);
 		writer.write(COLON_SPACE + String.valueOf(searchResult.getMatchCount()) + COMMA_NEW_LINE);
 		writeQuote("score", writer, indent + 1);

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +38,40 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	}
 
 	/**
+	 * Acquires the read lock, performs the specified read operation, and then
+	 * releases the lock in a thread-safe manner.
+	 *
+	 * @param <T> the return type of the read operation
+	 * @param operation the read operation to perform
+	 * @return the result of the read operation
+	 */
+	private <T> T readOperation(Supplier<T> operation) {
+		lock.readLock().lock();
+		try {
+			return operation.get();
+		}
+		finally {
+			lock.readLock().unlock();
+		}
+	}
+
+	/**
+	 * Acquires the write lock, performs the specified write operation, and then
+	 * releases the lock in a thread-safe manner.
+	 *
+	 * @param operation the write operation to perform
+	 */
+	private void writeOperation(Runnable operation) {
+		lock.writeLock().lock();
+		try {
+			operation.run();
+		}
+		finally {
+			lock.writeLock().unlock();
+		}
+	}
+
+	/**
 	 * Adds a list of words from a source to the inverted index and updates the word
 	 * count in a thread safe manner.
 	 *
@@ -45,13 +80,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public void add(List<String> words, String source) {
-		lock.writeLock().lock();
-		try {
-			super.add(words, source);
-		}
-		finally {
-			lock.writeLock().unlock();
-		}
+		writeOperation(() -> super.add(words, source));
 	}
 
 	/**
@@ -64,13 +93,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public void add(String word, String source, int position) {
-		lock.writeLock().lock();
-		try {
-			super.add(word, source, position);
-		}
-		finally {
-			lock.writeLock().unlock();
-		}
+		writeOperation(() -> super.add(word, source, position));
 	}
 
 	/**
@@ -81,13 +104,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public void addAll(InvertedIndex other) {
-		lock.writeLock().lock();
-		try {
-			super.addAll(other);
-		}
-		finally {
-			lock.writeLock().unlock();
-		}
+		writeOperation(() -> super.addAll(other));
 	}
 
 	/**
@@ -98,13 +115,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public int sizeCounts() {
-		lock.readLock().lock();
-		try {
-			return super.sizeCounts();
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(super::sizeCounts);
 	}
 
 	/**
@@ -115,14 +126,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public int sizeWords() {
-		lock.readLock().lock();
-
-		try {
-			return super.sizeWords();
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(super::sizeWords);
 	}
 
 	/**
@@ -134,13 +138,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public int sizeSources(String word) {
-		lock.readLock().lock();
-		try {
-			return super.sizeSources(word);
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(() -> super.sizeSources(word));
 	}
 
 	/**
@@ -154,13 +152,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public int sizePositions(String word, String source) {
-		lock.readLock().lock();
-		try {
-			return super.sizePositions(word, source);
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(() -> super.sizePositions(word, source));
 	}
 
 	/**
@@ -172,13 +164,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public boolean hasCounts(String source) {
-		lock.readLock().lock();
-		try {
-			return super.hasCounts(source);
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(() -> super.hasCounts(source));
 	}
 
 	/**
@@ -189,13 +175,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public boolean hasWord(String word) {
-		lock.readLock().lock();
-		try {
-			return super.hasWord(word);
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(() -> super.hasWord(word));
 	}
 
 	/**
@@ -208,15 +188,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public boolean hasSource(String word, String source) {
-		lock.readLock().lock();
-
-		try {
-
-			return super.hasSource(word, source);
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(() -> super.hasSource(word, source));
 	}
 
 	/**
@@ -230,14 +202,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public boolean hasPosition(String word, String source, int position) {
-
-		lock.readLock().lock();
-		try {
-			return super.hasPosition(word, source, position);
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(() -> super.hasPosition(word, source, position));
 	}
 
 	/**
@@ -248,14 +213,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public SortedMap<String, Integer> viewCounts() {
-		lock.readLock().lock();
-
-		try {
-			return super.viewCounts();
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(super::viewCounts);
 	}
 
 	/**
@@ -266,14 +224,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public SortedSet<String> viewWords() {
-		lock.readLock().lock();
-
-		try {
-			return super.viewWords();
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(super::viewWords);
 	}
 
 	/**
@@ -286,14 +237,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public SortedSet<String> viewSources(String word) {
-		lock.readLock().lock();
-
-		try {
-			return super.viewSources(word);
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(() -> super.viewSources(word));
 	}
 
 	/**
@@ -307,14 +251,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public SortedSet<Integer> viewPositions(String word, String source) {
-		lock.readLock().lock();
-
-		try {
-			return super.viewPositions(word, source);
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(() -> super.viewPositions(word, source));
 	}
 
 	/**
@@ -325,14 +262,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public String toString() {
-		lock.readLock().lock();
-
-		try {
-			return super.toString();
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(super::toString);
 	}
 
 	/**
@@ -343,14 +273,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public String countstoJson() {
-		lock.readLock().lock();
-
-		try {
-			return super.countstoJson();
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(super::countstoJson);
 	}
 
 	/**
@@ -399,14 +322,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public String indexToJson() {
-		lock.readLock().lock();
-
-		try {
-			return super.indexToJson();
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(super::indexToJson);
 	}
 
 	/**
@@ -454,14 +370,7 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public List<SearchResult> searchPartial(Set<String> query) {
-		lock.readLock().lock();
-
-		try {
-			return super.searchPartial(query);
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(() -> super.searchPartial(query));
 	}
 
 	/**
@@ -472,14 +381,6 @@ public class ThreadSafeInvertedIndex extends InvertedIndex {
 	 */
 	@Override
 	public List<SearchResult> searchExact(Set<String> query) {
-		lock.readLock().lock();
-
-		try {
-			return super.searchExact(query);
-		}
-		finally {
-			lock.readLock().unlock();
-		}
+		return readOperation(() -> super.searchExact(query));
 	}
-
 }

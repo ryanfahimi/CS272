@@ -80,6 +80,9 @@ public class SearchServlet extends HttpServlet {
 	/** Size of window of pages to display for pagination. */
 	private static final int WINDOW_SIZE = 3;
 
+	/** Path to the HTML template for the search page. */
+	private static final String HTML_TEMPLATE_PATH = "templates/index.html";
+
 	/** The HTML template for the search page. */
 	private final String htmlTemplate;
 
@@ -91,11 +94,10 @@ public class SearchServlet extends HttpServlet {
 	 */
 	public SearchServlet() throws IOException {
 		if (SearchEngine.RESOURCES_EXIST) {
-			this.htmlTemplate = Files.readString(SearchEngine.RESOURCES.resolve("templates/index.html"),
-					StandardCharsets.UTF_8);
+			this.htmlTemplate = Files.readString(SearchEngine.RESOURCES.resolve(HTML_TEMPLATE_PATH), StandardCharsets.UTF_8);
 		}
 		else {
-			try (InputStream is = SearchServlet.class.getResourceAsStream("/templates/index.html")) {
+			try (InputStream is = SearchServlet.class.getResourceAsStream("/" + HTML_TEMPLATE_PATH)) {
 				if (is == null) {
 					throw new IOException("Could not find index.html in classpath");
 				}
@@ -153,7 +155,7 @@ public class SearchServlet extends HttpServlet {
 		try {
 			return pageNumber == null ? 1 : Math.max(1, Integer.parseInt(pageNumber));
 		}
-		catch (NullPointerException | NumberFormatException e) {
+		catch (NumberFormatException e) {
 			return 1;
 		}
 	}
@@ -280,7 +282,7 @@ public class SearchServlet extends HttpServlet {
 	 */
 	private static String renderCard(InvertedIndex.SearchResult result, HttpServletRequest request) {
 		boolean isWeb = LinkFinder.isHttp(result.getSource());
-		String url = StringEscapeUtils.escapeHtml4(isWeb ? result.getSource() : fromFileToUri(request, result.getSource()));
+		String url = StringEscapeUtils.escapeHtml4(isWeb ? result.getSource() : fileToUri(request, result.getSource()));
 		double score = result.getScore();
 		String scoreClass = score >= 0.7 ? "bg-green-500" : score >= 0.4 ? "bg-yellow-400" : "bg-red-500";
 		int pct = (int) (score * 100);
@@ -316,7 +318,7 @@ public class SearchServlet extends HttpServlet {
 	 * @param file the source file path
 	 * @return a formatted URL string for the source
 	 */
-	private static String fromFileToUri(HttpServletRequest request, String file) {
+	private static String fileToUri(HttpServletRequest request, String file) {
 		Path path = Path.of(file).toAbsolutePath().normalize();
 		Path relativePath = SearchEngine.getTextFiles().relativize(path);
 
