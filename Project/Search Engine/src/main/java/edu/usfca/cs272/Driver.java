@@ -21,7 +21,7 @@ import edu.usfca.cs272.query.ConcurrentQueryProcessor;
 import edu.usfca.cs272.query.QueryProcessor;
 import edu.usfca.cs272.query.SerialQueryProcessor;
 import edu.usfca.cs272.servlet.SearchEngine;
-import threads.WorkQueue;
+import edu.usfca.cs272.threads.WorkQueue;
 
 /**
  * Class responsible for running this project based on the provided command-line

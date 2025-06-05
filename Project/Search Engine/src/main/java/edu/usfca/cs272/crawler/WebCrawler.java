@@ -14,10 +14,10 @@ import org.apache.logging.log4j.Logger;
 
 import edu.usfca.cs272.index.InvertedIndex;
 import edu.usfca.cs272.index.ThreadSafeInvertedIndex;
+import edu.usfca.cs272.threads.WorkQueue;
 import edu.usfca.cs272.util.FileStemmer;
 import opennlp.tools.stemmer.Stemmer;
 import opennlp.tools.stemmer.snowball.SnowballStemmer;
-import threads.WorkQueue;
 
 /**
  * Class responsible for crawling URIs and storing their content into an

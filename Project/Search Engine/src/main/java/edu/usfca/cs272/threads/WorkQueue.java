@@ -1,4 +1,4 @@
-package threads;
+package edu.usfca.cs272.threads;
 
 import java.util.LinkedList;
 

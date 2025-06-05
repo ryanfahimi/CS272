@@ -14,9 +14,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import edu.usfca.cs272.index.InvertedIndex;
+import edu.usfca.cs272.threads.WorkQueue;
 import edu.usfca.cs272.util.FileStemmer;
 import edu.usfca.cs272.util.JsonWriter;
-import threads.WorkQueue;
 
 /**
  * Handles query processing for an inverted index concurrently. Reads queries
